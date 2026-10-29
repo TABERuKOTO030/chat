@@ -1,4 +1,4 @@
-const V='hush-v2';
+const V='hush-v3';
 const ASSETS=['./','index.html','styles.css','config.js','crypto.js','backend.js','core.js','ui.js','vendor/supabase.js','fonts/fredoka.woff2','fonts/abril.woff2','fonts/serif-cjk.woff2','manifest.json','icons/icon-192.png','icons/icon-512.png','icons/badge.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
