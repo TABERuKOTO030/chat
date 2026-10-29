@@ -223,3 +223,14 @@ body.privacy #app{filter:blur(22px)}
 /* ================= 手机布局 ================= */
 @media(max-width:759px){.side{width:100%}.pane{display:none}.shell.open .side{display:none}.shell.open .pane{display:block}.back{display:inline-grid}}
 @media(min-width:760px){.side{box-shadow:1px 0 0 rgba(0,0,0,.04)}.t-office .side{background:#EDEDEE}}
+/* ---- 日本語 ---- */
+@font-face{font-family:HushSerifJP;src:url(fonts/serif-jp.woff2) format('woff2');font-weight:700;font-display:swap}
+html[lang=ja] .t-gacha{--font:"Fredoka","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans CJK JP","Noto Sans JP",sans-serif;--display:"Fredoka","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic","Noto Sans CJK JP",sans-serif}
+html[lang=ja] .t-office{--font:"Helvetica Neue","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans CJK JP","Noto Sans JP",Arial,sans-serif;--display:"Abril","HushSerifJP","Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;--mono:"SFMono-Regular",Menlo,Consolas,"Hiragino Sans","Yu Gothic","Noto Sans CJK JP",monospace}
+html[lang=ja] .sticky,html[lang=ja] .scr-cn{font-family:"HushSerifJP","Hiragino Mincho ProN","Yu Mincho",serif}
+html[lang=ja] body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
+html[lang=ja] .t-office .btn{letter-spacing:.02em}
+.sw-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.tswitch.lsw button span{font-size:12px}
+.tswitch button span{white-space:nowrap}
+.sw-row{margin:12px 16px}.sw-row .tswitch{margin:0}.sw-row .tswitch:not(.lsw){flex:1 1 220px}

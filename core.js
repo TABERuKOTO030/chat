@@ -18,10 +18,10 @@ async function signIn(email,password){
   return finishLogin(email,m,false);
 }
 async function unlock(password){
-  const u=await B.currentUser();if(!u)throw new Error('登录已过期，请重新登录');
+  const u=await B.currentUser();if(!u)throw new Error(T("登录已过期，请重新登录"));
   const m=await HC.deriveMaster(u.email,password);
-  const sec=await B.getSecret();if(!sec)throw new Error('账号数据不存在');
-  try{await HC.unwrapPriv(m.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error('密码不对')}
+  const sec=await B.getSecret();if(!sec)throw new Error(T("账号数据不存在"));
+  try{await HC.unwrapPriv(m.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error(T("密码不对"))}
   return finishLogin(u.email,m,false);
 }
 async function finishLogin(email,m,isNew){
@@ -32,7 +32,7 @@ async function finishLogin(email,m,isNew){
     let handle;for(let i=0;i<5;i++){handle=newHandle();try{await B.putAccount({handle,pub_ecdh:id.pub},{wrapped_priv:w.ct,wrap_iv:w.iv});break}catch(e){if(i==4)throw e}}
     sec=await B.getSecret();acc=await B.getAccount();
   }
-  let priv;try{priv=await HC.unwrapPriv(m.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error('密码不对（无法解开你的密钥）')}
+  let priv;try{priv=await HC.unwrapPriv(m.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error(T("密码不对（无法解开你的密钥）"))}
   let profile={name:'',bio:'',avatar:''};
   if(sec.enc_profile){try{profile=await HC.decJSON(m.kek,JSON.parse(sec.enc_profile),'profile')}catch(e){}}
   st.me={id:u.id,email,handle:acc.handle,pub:acc.pub_ecdh,priv,kek:m.kek,bak:m.bak,profile};
@@ -57,7 +57,7 @@ async function publishProfile(c){
 async function changePassword(oldPw,newPw){
   const old=await HC.deriveMaster(st.me.email,oldPw);
   const sec=await B.getSecret();
-  try{await HC.unwrapPriv(old.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error('原密码不对')}
+  try{await HC.unwrapPriv(old.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv})}catch(e){throw new Error(T("原密码不对"))}
   const pk8=await HC.aesDecRaw(old.kek,{iv:sec.wrap_iv,ct:sec.wrapped_priv},'hush-priv');
   const m=await HC.deriveMaster(st.me.email,newPw);
   const w=await HC.wrapPriv(m.kek,pk8);pk8.fill(0);
@@ -148,8 +148,8 @@ async function createConv(kind,memberIds,meta){
 }
 async function addContact(handle){
   handle=handle.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(handle===st.me.handle)throw new Error('这是你自己的邀请码');
-  const a=await B.findHandle(handle);if(!a)throw new Error('没有找到这个邀请码');
+  if(handle===st.me.handle)throw new Error(T("这是你自己的邀请码"));
+  const a=await B.findHandle(handle);if(!a)throw new Error(T("没有找到这个邀请码"));
   st.accounts.set(a.id,a);
   const ex=[...st.convs.values()].find(c=>c.kind==='dm'&&c.members.some(m=>m.user_id===a.id));
   if(ex)return ex;
@@ -165,7 +165,7 @@ async function addMembers(c,ids){
   await B.addMembers(ids.map(u=>({conv_id:c.id,user_id:u,role:'member'})));
   // 新成员拿到当前及历史版本的会话密钥，才能看到之前的消息
   const rows=[];for(const [v] of c.keys){const raw=await rawOf(c,v);for(const u of ids){const w=await HC.wrapConvKey(st.me.priv,st.accounts.get(u).pub_ecdh,c.id,v,raw);rows.push({conv_id:c.id,user_id:u,version:v,wrapped:w.ct,iv:w.iv,by_user:st.me.id,by_pub:st.me.pub})}raw.fill(0)}
-  await B.addKeys(rows);await sendSys(c,'邀请了 '+ids.map(nameOf).join('、')+' 加入群聊');await refresh();
+  await B.addKeys(rows);await sendSys(c,T("邀请了 ")+ids.map(nameOf).join(T("、"))+T(" 加入群聊"));await refresh();
 }
 // 会话密钥不可导出，需要原始字节时从服务器上的包裹副本重新解开
 async function rawOf(c,v){const rows=await B.myConvs();const r=rows.find(x=>x.id===c.id);const k=r.keys.find(k=>k.version===v);
@@ -177,7 +177,7 @@ async function removeMember(c,uid){
   const rows=[];for(const u of rest){const w=await HC.wrapConvKey(st.me.priv,st.accounts.get(u).pub_ecdh,c.id,v,raw);rows.push({conv_id:c.id,user_id:u,version:v,wrapped:w.ct,iv:w.iv,by_user:st.me.id,by_pub:st.me.pub})}
   await B.addKeys(rows);const key=await HC.importRaw(raw);raw.fill(0);c.keys.set(v,key);c.key_version=v;
   const box=await HC.encJSON(key,c.meta,'meta|'+c.id);await B.updateConv(c.id,{key_version:v,enc_meta:JSON.stringify({v,...box})});
-  await sendSys(c,'将 '+nameOf(uid)+' 移出了群聊（已更换群密钥）');await refresh();
+  await sendSys(c,T("将 ")+nameOf(uid)+T(" 移出了群聊（已更换群密钥）"));await refresh();
 }
 async function leaveConv(c){
   if(c.kind==='dm'){await clearConv(c);await B.deleteConv(c.id)}else{await B.removeMember(c.id,st.me.id)}
@@ -185,7 +185,7 @@ async function leaveConv(c){
 }
 // ---------- 消息 ----------
 async function send(c,body){
-  const v=c.key_version,k=c.keys.get(v);if(!k)throw new Error('还没拿到会话密钥');
+  const v=c.key_version,k=c.keys.get(v);if(!k)throw new Error(T("还没拿到会话密钥"));
   const box=await HC.encJSON(k,body,'msg|'+c.id);
   const ttl=+(c.meta.ttl||0);
   const row={id:uuid(),conv_id:c.id,key_version:v,ct:box.ct,iv:box.iv,expires_at:ttl?new Date(Date.now()+ttl*1000).toISOString():null};
@@ -193,9 +193,9 @@ async function send(c,body){
   if(!c.msgs.some(m=>m.id===row.id)){c.msgs.push({id:row.id,conv:c.id,sender:st.me.id,at:saved&&saved.created_at||new Date().toISOString(),exp:row.expires_at,mine:true,body});emit('msgs',c)}
   B.notify(c.id,row.id);return row.id;
 }
-const sendSys=(c,text)=>send(c,{t:'sys',text:(st.me.profile.name||'我')+' '+text});
+const sendSys=(c,text)=>send(c,{t:'sys',text:(st.me.profile.name||T("我"))+' '+text});
 async function sendFile(c,file,kind,extra){
-  if(file.size>CFG.MAX_FILE_MB*1024*1024)throw new Error('文件不能超过 '+CFG.MAX_FILE_MB+'MB');
+  if(file.size>CFG.MAX_FILE_MB*1024*1024)throw new Error(T("文件不能超过 ")+CFG.MAX_FILE_MB+'MB');
   const buf=new Uint8Array(await file.arrayBuffer());
   const e=await HC.encFile(buf);const p=c.id+'/'+uuid();
   await B.upload(p,e.ct);
@@ -243,10 +243,10 @@ async function exportBackup(withMedia,onProg){
   return new Blob([JSON.stringify({app:'hush-backup',v:1,kdf:'PBKDF2-SHA256-'+HC.ITERS,iv:box.iv,ct:box.ct})],{type:'application/octet-stream'});
 }
 async function importBackup(text,email,password){
-  const f=JSON.parse(text);if(f.app!=='hush-backup')throw new Error('不是悄悄话的备份文件');
+  const f=JSON.parse(text);if(f.app!=='hush-backup')throw new Error(T("不是悄悄话的备份文件"));
   let key=st.me&&st.me.bak;
   if(password){key=(await HC.deriveMaster(email,password)).bak}
-  try{return JSON.parse(new TextDecoder().decode(await HC.aesDecRaw(key,f,'hush-backup')))}catch(e){throw new Error('解不开：需要导出时的邮箱和密码')}
+  try{return JSON.parse(new TextDecoder().decode(await HC.aesDecRaw(key,f,'hush-backup')))}catch(e){throw new Error(T("解不开：需要导出时的邮箱和密码"))}
 }
 // ---------- 彻底销毁 ----------
 async function wipeAccount(){
@@ -265,8 +265,8 @@ async function wipeLocal(){
 }
 // ---------- 推送 ----------
 async function enablePush(){
-  if(!('Notification' in window))throw new Error('这个浏览器不支持通知');
-  const p=await Notification.requestPermission();if(p!=='granted')throw new Error('没有获得通知权限');
+  if(!('Notification' in window))throw new Error(T("这个浏览器不支持通知"));
+  const p=await Notification.requestPermission();if(p!=='granted')throw new Error(T("没有获得通知权限"));
   if(!CFG.VAPID_PUBLIC_KEY||!('PushManager' in window))return 'local';
   const reg=await navigator.serviceWorker.ready;
   const key=Uint8Array.from(atob(CFG.VAPID_PUBLIC_KEY.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
@@ -274,13 +274,13 @@ async function enablePush(){
   await B.savePush(sub.toJSON());return 'push';
 }
 // ---------- 显示用 ----------
-function nameOf(uid){if(st.me&&uid===st.me.id)return st.me.profile.name||'我';
+function nameOf(uid){if(st.me&&uid===st.me.id)return st.me.profile.name||T("我");
   for(const c of st.convs.values()){const m=c.members.find(m=>m.user_id===uid);if(m&&m.profile&&m.profile.name)return m.profile.name}
-  const a=st.accounts.get(uid);return a?'用户 '+a.handle.slice(0,4):'已离开的成员'}
+  const a=st.accounts.get(uid);return a?T("用户 ")+a.handle.slice(0,4):T("已离开的成员")}
 function profileOf(uid){if(st.me&&uid===st.me.id)return st.me.profile;let best=null;for(const c of st.convs.values()){const m=c.members.find(m=>m.user_id===uid);if(m&&m.profile&&(!best||(m.profile.pv||0)>(best.pv||0)))best=m.profile}return best||{}}
 function peerOf(c){const m=c.members.find(m=>m.user_id!==st.me.id);return m&&m.user_id}
-function convTitle(c){if(c.kind==='group')return c.meta.name||('群聊 ('+c.members.length+')');const p=peerOf(c);return p?nameOf(p):'只剩我自己'}
+function convTitle(c){if(c.kind==='group')return c.meta.name||(T("群聊 (")+c.members.length+')');const p=peerOf(c);return p?nameOf(p):T("只剩我自己")}
 function convAvatar(c){if(c.kind==='group')return c.meta.avatar||'';const p=peerOf(c);return p?(profileOf(p).avatar||''):''}
-function preview(b){if(!b)return'';return{text:b.text,img:'[图片]',video:'[视频]',voice:'[语音]',file:'[文件] '+(b.blob&&b.blob.name||''),sys:b.text,locked:'🔒 无法解密的消息'}[b.t]||''}
+function preview(b){if(!b)return'';return{text:b.text,img:T("[图片]"),video:T("[视频]"),voice:T("[语音]"),file:T("[文件] ")+(b.blob&&b.blob.name||''),sys:b.text,locked:T("🔒 无法解密的消息")}[b.t]||''}
 Object.assign(st,{signUp,signIn,unlock,lock,signOut,saveProfile,changePassword,refresh,createConv,addContact,updateMeta,addMembers,removeMember,leaveConv,send,sendFile,blobUrl,deleteForAll,deleteForMe,clearConv,markRead,addFav,delFav,exportBackup,importBackup,wipeAccount,wipeLocal,enablePush,nameOf,profileOf,peerOf,convTitle,convAvatar,preview,on:f=>st.listeners.add(f),ensureAccounts});
 })();
