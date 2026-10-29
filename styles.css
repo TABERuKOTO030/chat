@@ -234,3 +234,60 @@ html[lang=ja] .t-office .btn{letter-spacing:.02em}
 .tswitch.lsw button span{font-size:12px}
 .tswitch button span{white-space:nowrap}
 .sw-row{margin:12px 16px}.sw-row .tswitch{margin:0}.sw-row .tswitch:not(.lsw){flex:1 1 220px}
+/* ---- 个人名片 ---- */
+.av[data-act=pcard]{cursor:pointer}
+.av.xxl{width:132px;height:132px;font-size:52px}
+.pc-sheet .pc-head{padding-bottom:0;margin-bottom:-8px}
+.pcard{position:relative;margin:4px 8px 14px;padding:26px 18px 20px;text-align:center;border-radius:28px;background:#FFF6EE;box-shadow:0 14px 30px rgba(224,127,162,.16)}
+.pc-av{position:relative;display:inline-grid;place-items:center;width:176px;height:176px;margin:0 auto 6px;background:none;border:0;padding:0}
+.pc-scallop{position:absolute;left:50%;top:22px;width:176px;height:176px;transform:translateX(-50%) rotate(-6deg);fill:#F9C9D9}
+.pcard .tape{top:14px;right:22px}
+.pc-name{margin:6px 0 2px;font-size:24px;font-weight:700;color:var(--ink);word-break:break-word}
+.pc-id{margin:0;font-family:"Fredoka",var(--mono),monospace;font-weight:600;letter-spacing:.12em;color:var(--muted);font-size:13px}
+.pc-bio{margin:12px auto 0;max-width:280px;font-size:14px;line-height:1.55;color:var(--ink);word-break:break-word}.pc-bio i{color:var(--muted);font-style:normal}
+.pc-tag{display:inline-block;margin:14px 0 0;padding:4px 12px;border-radius:999px;background:#E3F1FB;color:#4A86B0;font-size:11.5px}
+.pc-acts{display:flex;gap:10px;padding:0 8px 6px}.pc-acts .btn{flex:1}
+.t-office .pcard{border-radius:4px;background:#fff;padding:0 0 20px;box-shadow:0 16px 34px rgba(0,0,0,.12);overflow:visible;margin-top:22px}
+.t-office .pc-clip{position:absolute;left:50%;top:-16px;width:54px;height:22px;transform:translateX(-50%);background:#D9D9DC;border-radius:3px}
+.t-office .pc-clip:after{content:"";position:absolute;left:50%;top:7px;width:26px;height:6px;margin-left:-13px;border-radius:3px;background:#fff}
+.pc-strip{display:flex;justify-content:space-between;background:#141414;color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:10px 14px;margin-bottom:18px;border-radius:4px 4px 0 0}
+.t-office .pc-av{width:auto;height:auto}.t-office .av.xxl{width:128px;height:150px;border-radius:2px}
+.t-office .pc-name{font-family:var(--display);font-weight:400;font-size:30px}
+.t-office .pc-id{font-family:var(--mono);display:inline-block;background:#3FC6D6;color:#141414;padding:2px 10px;margin-top:4px}
+.t-office .pc-bio{font-family:var(--font);color:#333}
+.t-office .pc-tag{border-radius:0;background:#EFEFF0;color:#555;font-family:var(--mono);letter-spacing:.04em}
+.avzoom{position:fixed;inset:0;z-index:999;background:rgba(10,10,14,.86);display:grid;place-items:center;cursor:zoom-out}.avzoom img{max-width:92vw;max-height:86vh;border-radius:12px}
+.kv{list-style:none;margin:6px 0 10px;padding:0}.kv li{display:flex;justify-content:space-between;padding:10px 4px;border-bottom:1px dashed rgba(0,0,0,.08);font-size:14px}.kv b{font-weight:600}
+.warnline{background:#FFF3D6;padding:8px 10px;border-radius:10px}.t-office .warnline{border-radius:0}
+.tg{width:38px;height:22px;border-radius:999px;background:#E6E1E4;position:relative;flex:none;transition:background .2s}.tg i{position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:left .2s}
+.tg.on{background:#F7A6C3}.tg.on i{left:19px}
+.t-office .tg{border-radius:0;background:#D9D9DC}.t-office .tg i{border-radius:0}.t-office .tg.on{background:#141414}.t-office .tg.on i{background:#3FC6D6}
+.msg.me .self-av{order:2}
+/* 名片颜色 */
+.pcard.acc-pink{--pa:#F9C9D9;--pt:#E07FA2}.pcard.acc-blue{--pa:#BFE1F6;--pt:#4A86B0}.pcard.acc-mint{--pa:#C9EEDC;--pt:#3F9A72}.pcard.acc-lemon{--pa:#FBEBA8;--pt:#A98A1C}.pcard.acc-ink{--pa:#D9D9DC;--pt:#141414}
+.pc-scallop{fill:var(--pa,#F9C9D9)}.pc-tag{background:color-mix(in srgb,var(--pa,#E3F1FB) 55%,#fff);color:var(--pt,#4A86B0)}
+.t-office .pc-id{background:var(--pa,#3FC6D6)}.t-office .pcard.acc-pink .pc-id{background:#3FC6D6}
+.accs{display:flex;gap:10px;margin-top:6px}.acc{width:30px;height:30px;border-radius:50%;border:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.8)}.acc.on{box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,0,0,.18)}
+.acc-pink.acc{background:#F9C9D9}.acc-blue.acc{background:#BFE1F6}.acc-mint.acc{background:#C9EEDC}.acc-lemon.acc{background:#FBEBA8}.acc-ink.acc{background:#3A3A3E}
+.t-office .acc{border-radius:0}
+/* 多套资料列表 */
+.plist{padding:6px 12px 12px}.prow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(0,0,0,.07)}
+.pmeta{flex:1;min-width:0}.pmeta b{display:flex;gap:6px;align-items:center;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pmeta small{color:var(--muted);font-size:11.5px}
+.pacts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%}.pacts .btn.sm{padding:5px 9px;font-size:11.5px}.btn.danger{color:#C9556F}
+.plist>.btn{margin-top:10px}.plist-pick button{display:flex;align-items:center;gap:8px}
+/* @ 提及 */
+.mention{display:inline;border:0;padding:0 3px;margin:0 1px;border-radius:6px;background:rgba(74,134,176,.14);color:#3D78A3;font:inherit;font-weight:600;cursor:pointer}
+.mention.me,.mention.all{background:#FFE7A3;color:#8A6A00}
+.msg.me .mention{background:rgba(255,255,255,.45);color:inherit}
+.t-office .mention{border-radius:0;background:#3FC6D6;color:#141414}.t-office .mention.me,.t-office .mention.all{background:#141414;color:#fff}
+.menpick{position:absolute;left:10px;right:10px;bottom:calc(100% + 6px);max-height:240px;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.14);padding:6px;z-index:20}
+.composer{position:relative}
+.menpick button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:12px;text-align:left;font:inherit;color:var(--ink)}.menpick button:hover{background:rgba(0,0,0,.04)}
+.menpick small{margin-left:auto;color:var(--muted);font-size:11px}.men-all{background:#FFE7A3;color:#8A6A00;font-weight:700}
+.t-office .menpick{border-radius:0}.t-office .menpick button{border-radius:0;font-family:var(--font)}.t-office .men-all{background:#141414;color:#fff}
+.menbadge{margin-left:auto;margin-right:6px;font-style:normal;font-size:11px;font-weight:700;color:#8A6A00;background:#FFE7A3;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.t-office .menbadge{border-radius:0;background:#141414;color:#3FC6D6;font-family:var(--mono)}
+.menjump{position:absolute;right:14px;bottom:84px;z-index:15;display:flex;align-items:center;gap:6px;border:0;padding:8px 14px;border-radius:999px;background:#FFE7A3;color:#8A6A00;font:inherit;font-weight:700;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.menjump b{font-size:15px}.t-office .menjump{border-radius:0;background:#141414;color:#3FC6D6;font-family:var(--mono)}
+.msg.flash .bubble{animation:flash 1.6s}@keyframes flash{0%,60%{box-shadow:0 0 0 4px #FFE7A3}100%{box-shadow:none}}
+#toasts,.toast{pointer-events:none}

@@ -4,6 +4,7 @@ const ST=window.ST,CFG=window.HUSH_CONFIG,$=s=>document.querySelector(s),$$=s=>[
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ui={tab:'chats',open:null,reply:null,q:'',cq:'',archive:null,sel:null};
 const S={get theme(){return localStorage.getItem('hush-theme')||'gacha'},set theme(v){localStorage.setItem('hush-theme',v)},
+  get selfAv(){return localStorage.getItem('hush-selfav')==='1'},set selfAv(v){localStorage.setItem('hush-selfav',v?'1':'0')},
   get lockMin(){return +(localStorage.getItem('hush-lock')||5)},set lockMin(v){localStorage.setItem('hush-lock',v)},
   get peek(){return localStorage.getItem('hush-peek')!=='0'},set peek(v){localStorage.setItem('hush-peek',v?'1':'0')}};
 const isOffice=()=>S.theme==='office';
@@ -23,8 +24,8 @@ const ICON={
   x:'<path d="M6 6l12 12M18 6L6 18"/>',play:'<path d="M8 5l11 7-11 7z"/>',pause:'<path d="M8 5v14M16 5v14"/>',timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4 1.5 4.5 4"/>',camera:'<rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/>'};
 const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24">${ICON[n]}</svg>`;
-function avatar(src,name,cls=''){const ch=(name||'?').trim().slice(0,1)||'?';const hue=[...(name||'?')].reduce((a,c)=>a+c.charCodeAt(0),0)%4;
-  return src?`<span class="av ${cls}"><img src="${esc(src)}" alt=""></span>`:`<span class="av ${cls} av-c${hue}"><em>${esc(ch)}</em></span>`}
+function avatar(src,name,cls='',uid=''){const at=uid?` data-act="pcard" data-uid="${esc(uid)}" role="button" tabindex="0"`:'';const ch=(name||'?').trim().slice(0,1)||'?';const hue=[...(name||'?')].reduce((a,c)=>a+c.charCodeAt(0),0)%4;
+  return src?`<span class="av ${cls}"${at}><img src="${esc(src)}" alt=""></span>`:`<span class="av ${cls} av-c${hue}"${at}><em>${esc(ch)}</em></span>`}
 // ---------- 工具 ----------
 const pad=n=>String(n).padStart(2,'0');
 const hm=iso=>{const d=new Date(iso);return pad(d.getHours())+':'+pad(d.getMinutes())};
@@ -99,9 +100,9 @@ function chatsTab(){const q=ui.q.trim().toLowerCase();let list=sortedConvs();
   ${ST.rt&&ST.rt!=='SUBSCRIBED'&&ST.rt!=='idle'?`<p class="rt-warn">${T("实时连接：")}${esc(ST.rt)}${T("，正在重连…")}</p>`:''}
   <ul class="clist">${list.map((c,i)=>{const last=c.msgs[c.msgs.length-1];const t=ST.convTitle(c);
     let pv=last?ST.preview(last.body):(c.kind==='dm'?T("已建立加密通道，打个招呼吧"):T("群聊已创建"));if(q&&last){const hit=[...c.msgs].reverse().find(m=>(m.body.text||'').toLowerCase().includes(q));if(hit)pv=hit.body.text}
-    if(last&&c.kind==='group'&&last.body.t!=='sys')pv=(last.mine?T("我"):ST.nameOf(last.sender))+T("：")+pv;
-    return`<li class="citem ${ui.open===c.id?'cur':''}" data-act="open" data-id="${c.id}">${i===0&&!isOffice()?'<span class="tape sm"></span>':''}${avatar(ST.convAvatar(c),t,'sticker')}<div class="cmain"><div class="crow"><b>${esc(t)}</b>${c.kind==='group'?`<span class="pill">${c.members.length}${T("人")}</span>`:''}${c.meta.ttl?`<span class="pill t">${ic('timer')}</span>`:''}<time>${listTime(last&&last.at||c.created_at)}</time></div>
-    <div class="crow"><p>${esc(pv)}</p>${c.unread?`<em class="ubadge">${c.unread>99?'99+':c.unread}</em>`:''}</div></div></li>`}).join('')}</ul>
+    if(last&&c.kind==='group'&&last.body.t!=='sys')pv=(last.mine?T("我"):ST.nameOf(last.sender,c.id))+T("：")+pv;
+    return`<li class="citem ${ui.open===c.id?'cur':''}" data-act="open" data-id="${c.id}">${i===0&&!isOffice()?'<span class="tape sm"></span>':''}${avatar(ST.convAvatar(c),t,'sticker',c.kind==='dm'&&ST.peerOf(c)?ST.peerOf(c)+'|'+c.id:'')}<div class="cmain"><div class="crow"><b>${esc(t)}</b>${c.kind==='group'?`<span class="pill">${c.members.length}${T("人")}</span>`:''}${c.meta.ttl?`<span class="pill t">${ic('timer')}</span>`:''}<time>${listTime(last&&last.at||c.created_at)}</time></div>
+    <div class="crow"><p>${esc(pv)}</p>${unseenMention(c)?`<em class="menbadge">${T("有人@你")}</em>`:''}${c.unread?`<em class="ubadge">${c.unread>99?'99+':c.unread}</em>`:''}</div></div></li>`}).join('')}</ul>
   ${!list.length?`<div class="empty">${isOffice()?ghost('big'):capsule('big')}<h4>${q?T("没有找到"):T("还没有对话")}</h4><p>${q?T("换个关键词试试"):T("把你的邀请码发给想聊天的人，或者输入对方的邀请码。")}</p>${q?'':`<button class="btn" data-act="add-friend">${T("添加好友")}</button>`}</div>`:''}`}
 function favsTab(){return`${brandHead(T("收藏夹"),ST.favs.length+T(" 条"))}<div class="favs">${ST.favs.map((f,i)=>{const b=f.data.body;
   return`<div class="fav" style="--r:${(i%3-1)*1.2}deg"><span class="${isOffice()?'ftape':'tape sm'}"></span><div class="fav-body">${b.t==='text'?`<p>${esc(b.text)}</p>`:b.thumb?`<img src="${esc(b.thumb)}" alt="">`:`<p class="fav-file">${esc(ST.preview(b))}</p>`}</div>
@@ -109,12 +110,12 @@ function favsTab(){return`${brandHead(T("收藏夹"),ST.favs.length+T(" 条"))}<
   ${!ST.favs.length?`<div class="empty">${isOffice()?ghost('big'):capsule('big')}<h4>${T("还没有收藏")}</h4><p>${T("长按（电脑上右键）任意消息，选择\"收藏\"。收藏内容同样加密保存，换设备登录也能看到。")}</p></div>`:''}`}
 function meTab(){const me=ST.me,p=me.profile;
   return`${brandHead(T("我的空间"),'ID '+me.handle)}
-  <div class="card me-card">${avatar(p.avatar,p.name||T("我"),'xl sticker')}<div><h3>${esc(p.name||T("未设置昵称"))}</h3><p>${esc(p.bio||T("写一句签名吧"))}</p></div><button class="btn sm" data-act="edit-profile">${T("编辑")}</button></div>
+  <div class="card me-card">${avatar(p.avatar,p.name||T("我"),'xl sticker',ST.me.id)}<div><h3>${esc(p.name||T("未设置昵称"))}</h3><p>${esc(p.bio||T("写一句签名吧"))}</p></div><button class="btn sm" data-act="edit-profile">${T("编辑")}</button></div>
   <div class="card code-card"><span class="lbl">${T("我的邀请码")}</span><div class="code">${me.handle.replace(/(.{4})/,'$1 ')}</div><div class="row-btns"><button class="btn sm" data-act="copy-code">${T("复制邀请码")}</button><button class="btn sm ghost" data-act="copy-link">${T("复制邀请链接")}</button></div><p class="fine">${T("对方输入邀请码即可和你建立端到端加密的对话。")}</p></div>
-  <h4 class="sec">${T("外观")}</h4>${themeSwitch()}<h4 class="sec">${T("语言")} · Language</h4>${langSwitch()}
+  ${profilesHtml()}<h4 class="sec">${T("外观")}</h4>${themeSwitch()}<h4 class="sec">${T("语言")} · Language</h4>${langSwitch()}
   <h4 class="sec">${T("安全与隐私")}</h4><div class="menu card">
    <button data-act="notify">${ic('chat')}<span>${T("消息提醒")}</span><em>${notifState()}</em></button>
-   <button data-act="autolock">${ic('lock')}<span>${T("自动上锁")}</span><em>${S.lockMin?S.lockMin+T(" 分钟无操作"):T("关闭")}</em></button>
+   <button data-act="selfav" role="switch" aria-checked="${S.selfAv}">${ic('chat')}<span>${T("显示自己的头像")}</span><em class="tg ${S.selfAv?'on':''}"><i></i></em></button><button data-act="autolock">${ic('lock')}<span>${T("自动上锁")}</span><em>${S.lockMin?S.lockMin+T(" 分钟无操作"):T("关闭")}</em></button>
    <button data-act="peek">${ic('search')}<span>${T("弹窗显示内容预览")}</span><em>${S.peek?T("开"):T("关")}</em></button>
    <button data-act="my-fp">${ic('shield')}<span>${T("我的密钥指纹")}</span><em></em></button>
    <button data-act="change-pw">${ic('lock')}<span>${T("修改主密码")}</span><em></em></button>
@@ -134,7 +135,7 @@ function renderPane(){const el=$('#pane');if(!el)return;const c=ui.open&&ST.conv
   if(!c){el.innerHTML=`<div class="pane-empty">${isOffice()?`<div class="pe-office"><h2 class="serif-xl">NO FILE<br>OPENED</h2>${ghost('big')}<span class="tag">${T("选择一个对话")}</span></div>`:`<div class="pe-gacha"><div class="wordmark">GACHA<br>GACHA</div>${capsule('huge')}${badge('HUSH',T("选个对话"))}</div>`}</div>`;return}
   const t=ST.convTitle(c);const sub=c.kind==='group'?`${c.members.length} ${T("位成员 · 端到端加密")}`:(isVerified(c)?T("已核对安全码 · 端到端加密"):T("端到端加密"));
   el.innerHTML=`<section class="chat">
-   <header class="chat-hd">${isOffice()?'<div class="chrome"><i></i><i></i><i></i><span>'+esc(t.toUpperCase())+'.CHAT</span></div>':''}<div class="chat-hd-row"><button class="ibtn back" data-act="back" aria-label="${T('返回')}">${ic('back')}</button>${avatar(ST.convAvatar(c),t,'sm sticker')}
+   <header class="chat-hd">${isOffice()?'<div class="chrome"><i></i><i></i><i></i><span>'+esc(t.toUpperCase())+'.CHAT</span></div>':''}<div class="chat-hd-row"><button class="ibtn back" data-act="back" aria-label="${T('返回')}">${ic('back')}</button>${avatar(ST.convAvatar(c),t,'sm sticker',c.kind==='dm'&&ST.peerOf(c)?ST.peerOf(c)+'|'+c.id:'')}
     <div class="chat-title" data-act="info"><b>${esc(t)}</b><small>${c.meta.ttl?ic('timer')+T(" 阅后即焚 ")+ttlLabel(c.meta.ttl)+' · ':''}${esc(sub)}</small></div>
     <button class="ibtn" data-act="chat-search" aria-label="${T('搜索')}">${ic('search')}</button><button class="ibtn" data-act="info" aria-label="${T('详情')}">${ic('info')}</button></div>
     <div class="csearch ${ui.cq!==''?'on':''}${T("\"><input id=\"cq\" placeholder=\"在本对话中搜索\" value=\"")}${esc(ui.cq)}"><span id="cqn"></span></div></header>
@@ -144,7 +145,7 @@ function renderPane(){const el=$('#pane');if(!el)return;const c=ui.open&&ST.conv
     <textarea id="txt" rows="1" placeholder="${isOffice()?'TYPE A MESSAGE…':T("说点悄悄话…")}"></textarea>
     <button class="ibtn" data-act="voice" id="micb" aria-label="${T('语音')}">${ic('mic')}</button><button class="sendb" data-act="send" aria-label="${T('发送')}">${isOffice()?'SEND':''}${ic('send')}</button></footer></section>`;
   const tx=$('#txt');tx.value=ui.draft&&ui.draft[c.id]||'';
-  tx.oninput=()=>{tx.style.height='auto';tx.style.height=Math.min(tx.scrollHeight,140)+'px';(ui.draft=ui.draft||{})[c.id]=tx.value};
+  tx.oninput=()=>{showMention(c,tx);tx.style.height='auto';tx.style.height=Math.min(tx.scrollHeight,140)+'px';(ui.draft=ui.draft||{})[c.id]=tx.value};
   tx.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&matchMedia('(pointer:fine)').matches){e.preventDefault();doSend()}};
   const cq=$('#cq');cq.oninput=()=>{ui.cq=cq.value;renderMsgs(true)};
   renderMsgs(true);renderReply();ST.markRead(c);
@@ -162,18 +163,36 @@ function renderMsgs(toBottom){const el=$('#msgs');const c=ST.convs.get(ui.open);
     if(m.body.t==='sys'){html+=`<div class="sys">${esc(m.body.text)}</div>`;lastSender='';continue}
     const first=m.sender!==lastSender;lastSender=m.sender;
     let read='';if(m.mine&&others.length){const n=others.filter(o=>o.last_read&&o.last_read>=m.at).length;read=c.kind==='dm'?(n?T("已读"):T("送达")):(n?n+T("人已读"):T("送达"))}
-    const prof=ST.profileOf(m.sender);
-    html+=`<div class="msg ${m.mine?'me':'them'} ${first?'first':''}" data-mid="${m.id}">${!m.mine?(first?avatar(prof.avatar,ST.nameOf(m.sender),'xs sticker'):'<span class="av-sp"></span>'):''}
-     <div class="mcol">${!m.mine&&first&&c.kind==='group'?`<span class="mname">${esc(ST.nameOf(m.sender))}</span>`:''}
+    const prof=ST.profileOf(m.sender,c.id);
+    html+=`<div class="msg ${m.mine?'me':'them'} ${first?'first':''}" data-mid="${m.id}">${!m.mine?(first?avatar(prof.avatar,ST.nameOf(m.sender,c.id),'xs sticker',m.sender+'|'+c.id):'<span class="av-sp"></span>'):''}
+     <div class="mcol">${!m.mine&&first&&c.kind==='group'?`<span class="mname">${esc(ST.nameOf(m.sender,c.id))}</span>`:''}
      <div class="bubble b-${m.body.t}">${m.body.reply?`<div class="quote"><b>${esc(m.body.reply.s)}</b>${esc(m.body.reply.p)}</div>`:''}${bodyHtml(m)}</div>
-     <span class="mmeta">${m.exp?ic('timer'):''}${hm(m.at)}${read?' · '+read:''}</span></div></div>`}
+     <span class="mmeta">${m.exp?ic('timer'):''}${hm(m.at)}${read?' · '+read:''}</span></div>${m.mine&&S.selfAv?(first?avatar(ST.effProfile(c.id).avatar,ST.nameOf(ST.me.id,c.id),'xs sticker self-av',ST.me.id+'|'+c.id):'<span class="av-sp"></span>'):''}</div>`}
   el.innerHTML=html;
+  {let j=$('#menjump');const um=unseenMention(c);if(um&&!j){j=document.createElement('button');j.id='menjump';j.className='menjump';el.parentNode.style.position='relative';el.parentNode.appendChild(j)}
+   if(j&&!um)j.remove();if(j&&um){j.innerHTML=`<b>@</b>${T("有人@你")}`;j.onclick=()=>{const t=el.querySelector(`[data-mid="${um.id}"]`);if(t){t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),1600)}localStorage.setItem('hush-men-'+c.id,um.id);j.remove();renderSide()}}}
   if(toBottom||near)el.scrollTop=el.scrollHeight;
   el.querySelectorAll('.msg').forEach(bindMsg);
   el.querySelectorAll('img.lazy').forEach(i=>i.onload=()=>{if(toBottom||near)el.scrollTop=el.scrollHeight});
 }
+const ALLTAGS=()=>['@所有人','@全員'];
+function mentionify(html,b){if(!b.men&&!b.all)return html;const cid=ui.open;
+  for(const id of (b.men||[])){const n=esc('@'+ST.nameOf(id,cid));const orig=null;html=html.split(n).join(`<button class="mention ${id===ST.me.id?'me':''}" data-act="pcard" data-uid="${esc(id)}|${esc(cid)}">${n}</button>`)}
+  if(b.all)for(const t of ALLTAGS())html=html.split(esc(t)).join(`<span class="mention all">${esc(t)}</span>`);return html}
+function mentionsMe(m){return !m.mine&&m.body&&m.body.t==='text'&&((m.body.men||[]).includes(ST.me.id)||m.body.all)}
+function lastMention(c){for(let i=c.msgs.length-1;i>=0;i--)if(mentionsMe(c.msgs[i]))return c.msgs[i];return null}
+function unseenMention(c){const m=lastMention(c);return m&&localStorage.getItem('hush-men-'+c.id)!==m.id?m:null}
+function hideMention(){const p=$('#menpick');if(p)p.remove()}
+function showMention(c,tx){const pos=tx.selectionStart;const before=tx.value.slice(0,pos);const mt=before.match(/@([^\s@]{0,16})$/);if(!mt||c.kind!=='group')return hideMention();
+  const q=mt[1].toLowerCase();const allT=LANG()==='ja'?'@全員':'@所有人';
+  const items=[{id:'*',name:allT.slice(1)},...c.members.filter(m=>m.user_id!==ST.me.id).map(m=>({id:m.user_id,name:ST.nameOf(m.user_id,c.id),av:(ST.profileOf(m.user_id,c.id)||{}).avatar}))].filter(x=>!q||x.name.toLowerCase().includes(q));
+  if(!items.length)return hideMention();let p=$('#menpick');if(!p){p=document.createElement('div');p.id='menpick';p.className='menpick';tx.closest('.composer').appendChild(p)}
+  p.innerHTML=items.map(x=>`<button data-mu="${esc(x.id)}">${x.id==='*'?'<span class="av xs men-all">@</span>':avatar(x.av,x.name,'xs sticker')}<b>${esc(x.name)}</b>${x.id==='*'?`<small>${T("提醒群里所有人")}</small>`:''}</button>`).join('');
+  p.querySelectorAll('[data-mu]').forEach(b=>b.onmousedown=b.ontouchstart=ev=>{ev.preventDefault();const x=items.find(i=>i.id===b.dataset.mu);const tag='@'+x.name+' ';
+    tx.value=before.slice(0,before.length-mt[0].length)+tag+tx.value.slice(pos);const np=before.length-mt[0].length+tag.length;tx.setSelectionRange(np,np);tx.focus();
+    if(x.id!=='*')(ui.men=ui.men||{})[x.id]=x.name;hideMention();tx.oninput&&tx.oninput()})}
 function bodyHtml(m){const b=m.body;
-  if(b.t==='text')return`<p>${linkify(esc(b.text))}</p>`;
+  if(b.t==='text')return`<p>${mentionify(linkify(esc(b.text)),b)}</p>`;
   if(b.t==='img')return`<button class="media" data-act="view" data-mid="${m.id}" style="aspect-ratio:${b.w&&b.h?b.w+'/'+b.h:'4/3'}"><img class="lazy" src="${esc(b.thumb||'')}${T("\" alt=\"图片\">")}</button>`;
   if(b.t==='video')return`<button class="media vid" data-act="view" data-mid="${m.id}" style="aspect-ratio:${b.w&&b.h?b.w+'/'+b.h:'16/9'}">${b.thumb?`<img src="${esc(b.thumb)}${T("\" alt=\"视频\">")}`:''}<span class="playb">${ic('play')}</span>${b.dur?`<em>${Math.floor(b.dur/60)}:${pad(b.dur%60)}</em>`:''}</button>`;
   if(b.t==='voice'){const bars=Array.from({length:22},(_,i)=>{const v=(parseInt(m.id.replace(/-/g,'').slice(i%30,i%30+2),16)||90)%70+30;return`<i style="height:${v}%"></i>`}).join('');
@@ -194,7 +213,7 @@ function msgMenu(id){const [c,m]=curMsg(id);if(!m||m.body.t==='sys')return;
    <button data-a="me">${ic('x')}${T("仅在我这里删除")}</button>${m.mine||c.isAdmin?`<button data-a="all" class="danger">${ic('x')}${T("为所有人删除")}</button>`:''}</div>
    <p class="fine">${T("为所有人删除会从服务器真正删除这条消息和附件，并让对方界面同步移除；但无法阻止对方之前截图或另存。")}</p>`,'small');
   s.querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{closeSheet();const a=b.dataset.a;
-    if(a==='reply'){ui.reply={id:m.id,s:ST.nameOf(m.sender),p:ST.preview(m.body).slice(0,60)};renderReply();$('#txt').focus()}
+    if(a==='reply'){ui.reply={id:m.id,s:ST.nameOf(m.sender,c.id),p:ST.preview(m.body).slice(0,60)};renderReply();$('#txt').focus()}
     if(a==='copy'){await navigator.clipboard.writeText(m.body.text).catch(()=>{});toast(T("已复制"))}
     if(a==='fav')await guard(()=>ST.addFav(c,m)).then(()=>toast(T("已收藏 ✦")));
     if(a==='me')ST.deleteForMe(c,[m.id]);
@@ -202,7 +221,7 @@ function msgMenu(id){const [c,m]=curMsg(id);if(!m||m.body.t==='sys')return;
 function renderReply(){const el=$('#replybar');if(!el)return;if(!ui.reply){el.innerHTML='';el.classList.remove('on');return}
   el.classList.add('on');el.innerHTML=`<div><b>${T("回复")} ${esc(ui.reply.s)}</b><span>${esc(ui.reply.p)}</span></div><button class="ibtn" data-act="cancel-reply">${ic('x')}</button>`}
 async function doSend(){const c=ST.convs.get(ui.open);const tx=$('#txt');const v=tx.value.trim();if(!v||!c)return;
-  const body={t:'text',text:v};if(ui.reply){body.reply={id:ui.reply.id,s:ui.reply.s,p:ui.reply.p};ui.reply=null;renderReply()}
+  const body={t:'text',text:v};if(c.kind==='group'){const men=Object.entries(ui.men||{}).filter(([id,n])=>v.includes('@'+n)).map(([id])=>id);if(men.length)body.men=men;if(ALLTAGS().some(t=>v.includes(t)))body.all=true}ui.men={};hideMention();if(ui.reply){body.reply={id:ui.reply.id,s:ui.reply.s,p:ui.reply.p};ui.reply=null;renderReply()}
   tx.value='';tx.style.height='auto';if(ui.draft)ui.draft[c.id]='';
   try{await ST.send(c,body)}catch(e){toast(T("发送失败：")+e.message,'err');tx.value=v}}
 async function sendMedia(kind){const c=ST.convs.get(ui.open);
@@ -242,23 +261,24 @@ async function dlFile(id){const [,m]=curMsg(id);if(!m)return;await guard(async()
 function infoSheet(){const c=ST.convs.get(ui.open);if(!c)return;const t=ST.convTitle(c);const grp=c.kind==='group';
   const s=sheet(`${sheetHead(grp?T("群聊详情"):T("聊天详情"))}
    <div class="info-top">${grp?`<button class="avbtn" data-a="gav">${avatar(c.meta.avatar,t,'xl sticker')}<span>${T("换头像")}</span></button>`:avatar(ST.convAvatar(c),t,'xl sticker')}
-    <div><h3>${esc(t)}</h3>${grp?`<button class="btn sm ghost" data-a="rename">${T("修改群名")}</button>`:`<p class="fine">${esc((ST.profileOf(ST.peerOf(c))||{}).bio||'')}</p>`}</div></div>
+    <div><h3>${esc(t)}</h3>${grp?`<button class="btn sm ghost" data-a="rename">${T("修改群名")}</button>`:`<p class="fine">${esc((ST.profileOf(ST.peerOf(c),c.id)||{}).bio||'')}</p>`}</div></div>
    <div class="menu card">
     ${!grp?`<button data-a="safety">${ic('shield')}<span>${T("核对安全码")}</span><em>${isVerified(c)?T("已核对 ✓"):T("防冒充")}</em></button>`:''}
+    <button data-a="myprof">${avatar(ST.effProfile(c.id).avatar,ST.effProfile(c.id).name,'xs sticker')}<span>${T("对此会话使用的资料")}</span><em>${esc(ST.effProfile(c.id).name||T("未设置昵称"))}</em></button>
     <button data-a="ttl">${ic('timer')}<span>${T("阅后即焚")}</span><em>${c.meta.ttl?ttlLabel(c.meta.ttl)+T("后自动删除"):T("关闭")}</em></button>
     <button data-a="clear">${ic('x')}<span>${c.isAdmin?T("清空聊天记录（所有人）"):T("删除我发过的全部消息")}</span><em></em></button>
     <button data-a="leave" class="danger">${ic('back')}<span>${grp?T("退出群聊"):T("删除对话")}</span><em></em></button></div>
-   ${grp?`<h4 class="sec">${T("成员")} ${c.members.length}${c.isAdmin?T("<button class=\"btn sm\" data-a=\"addm\">+ 邀请</button>"):''}</h4><ul class="mlist">${c.members.map(m=>`<li>${avatar((ST.profileOf(m.user_id)||{}).avatar,ST.nameOf(m.user_id),'sm sticker')}<b>${esc(ST.nameOf(m.user_id))}</b>${m.role==='admin'?T("<span class=\"pill\">管理员</span>"):''}
+   ${grp?`<h4 class="sec">${T("成员")} ${c.members.length}${c.isAdmin?T("<button class=\"btn sm\" data-a=\"addm\">+ 邀请</button>"):''}</h4><ul class="mlist">${c.members.map(m=>`<li>${avatar((ST.profileOf(m.user_id,c.id)||{}).avatar,ST.nameOf(m.user_id,c.id),'sm sticker',m.user_id+'|'+c.id)}<b>${esc(ST.nameOf(m.user_id,c.id))}</b>${m.role==='admin'?T("<span class=\"pill\">管理员</span>"):''}
      ${m.user_id!==ST.me.id?`<button class="btn sm ghost" data-a="msafety" data-u="${m.user_id}${T("\">安全码")}</button>${c.isAdmin?`<button class="btn sm ghost" data-a="kick" data-u="${m.user_id}${T("\">移出")}</button>`:''}`:T("<span class=\"pill\">我</span>")}</li>`).join('')}</ul>`:''}`);
   s.onclick=async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
     if(a==='rename'){const v=await promptBox(T("修改群名"),T("群名（会加密保存）"),c.meta.name);if(v!=null){await guard(async()=>{await ST.updateMeta(c,{name:v.trim().slice(0,40)});await ST.send(c,{t:'sys',text:(ST.me.profile.name||T("我"))+T(" 把群名改成了\"")+v.trim().slice(0,40)+'"'})});renderPane();infoSheet()}}
     if(a==='gav'){const f=await pickFile('image/*');if(f){await guard(async()=>{const {thumb}=await imgThumb(f,256,.8);await ST.updateMeta(c,{avatar:thumb});await ST.send(c,{t:'sys',text:(ST.me.profile.name||T("我"))+T(" 更换了群头像")})});renderPane();infoSheet()}}
     if(a==='ttl')ttlSheet(c);
-    if(a==='safety')safetySheet(ST.peerOf(c));if(a==='msafety')safetySheet(b.dataset.u);
+    if(a==='myprof')convProfileSheet(c);if(a==='safety')safetySheet(ST.peerOf(c));if(a==='msafety')safetySheet(b.dataset.u);
     if(a==='clear'&&await confirmBox(T("清空聊天记录"),c.isAdmin?T("会从服务器上真正删除这个对话里所有人的全部消息和附件，无法恢复。"):T("会从服务器上删除你在这里发过的全部消息和附件。"),T("清空"),true)){await guard(()=>ST.clearConv(c),T("正在清除…"));renderPane()}
     if(a==='leave'&&await confirmBox(grp?T("退出群聊"):T("删除对话"),grp?T("退出后你将无法再看到新消息。"):T("会删除双方服务器上的整段对话（包括附件），对方那边也会消失。"),grp?T("退出"):T("删除"),true)){await guard(()=>ST.leaveConv(c),T("正在处理…"));ui.open=null;closeSheet();renderMain()}
     if(a==='addm')pickMembers(T("邀请成员"),c.members.map(m=>m.user_id),async ids=>{await guard(()=>ST.addMembers(c,ids),T("正在分发群密钥…"));infoSheet()});
-    if(a==='kick'&&await confirmBox(T("移出成员"),T("移出 ")+esc(ST.nameOf(b.dataset.u))+T(" 后会自动更换群密钥，TA 看不到之后的消息。"),T("移出"),true)){await guard(()=>ST.removeMember(c,b.dataset.u),T("正在更换群密钥…"));infoSheet()}
+    if(a==='kick'&&await confirmBox(T("移出成员"),T("移出 ")+esc(ST.nameOf(b.dataset.u,c.id))+T(" 后会自动更换群密钥，TA 看不到之后的消息。"),T("移出"),true)){await guard(()=>ST.removeMember(c,b.dataset.u),T("正在更换群密钥…"));infoSheet()}
   }}
 function ttlSheet(c){const opts=[[0,T("关闭")],[30,T("30 秒")],[300,T("5 分钟")],[3600,T("1 小时")],[86400,T("1 天")],[604800,T("7 天")]];
   const s=sheet(`${sheetHead(T("阅后即焚"),T("开启后，新消息到时间会从服务器和所有人的界面上自动删除"))}<div class="opts">${opts.map(([v,l])=>`<button class="${(+c.meta.ttl||0)===v?'on':''}" data-v="${v}">${l}</button>`).join('')}</div>`,'small');
@@ -276,12 +296,45 @@ function pickMembers(title,exclude,cb,withName){const list=contacts().filter(u=>
    <div class="row-btns"><button class="btn ghost" data-act="close-sheet">${T("取消")}</button><button class="btn" id="pk">${T("确定")}</button></div>`);
   s.querySelector('#pk').onclick=async()=>{const ids=[...s.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value);if(!ids.length&&!withName)return toast(T("至少选一个人"));const n=withName?s.querySelector('#gname').value.trim():'';closeSheet();await cb(ids,n)}}
 // ---------- 个人资料 / 设置 ----------
-function profileSheet(){const p=ST.me.profile;let av=p.avatar||'';
-  const s=sheet(`${sheetHead(T("编辑资料"),T("昵称、签名、头像都会加密，只有和你聊天的人能看到"))}<div class="info-top"><button class="avbtn" id="pav">${avatar(av,p.name||T("我"),'xl sticker')}<span>${T("换头像")}</span></button></div>
-   <label class="fld"><span>${T("昵称")}</span><input id="pn" maxlength="24" value="${esc(p.name)}"></label><label class="fld"><span>${T("签名")}</span><input id="pb2" maxlength="60" value="${esc(p.bio)}"></label>
+const ACCENTS=['pink','blue','mint','lemon','ink'];
+function profileSheet(id){const P=ST.me.profile;const isNew=id==='new';const e=isNew?{name:'',bio:'',avatar:'',accent:'blue'}:(P.profiles.find(x=>x.id===(id||P.def))||P.profiles[0]);let av=e.avatar||'',acc=e.accent||'pink';
+  const s=sheet(`${sheetHead(isNew?T("新建资料"):T("编辑资料"),T("昵称、签名、头像都会加密，只有和你聊天的人能看到"))}<div class="info-top"><button class="avbtn" id="pav">${avatar(av,e.name||T("我"),'xl sticker')}<span>${T("换头像")}</span></button></div>
+   <label class="fld"><span>${T("昵称")}</span><input id="pn" maxlength="24" value="${esc(e.name)}"></label><label class="fld"><span>${T("签名")}</span><input id="pb2" maxlength="60" value="${esc(e.bio)}"></label>
+   <div class="fld"><span>${T("名片颜色")}</span><div class="accs">${ACCENTS.map(a=>`<button class="acc acc-${a} ${a===acc?'on':''}" data-acc="${a}" aria-label="${a}"></button>`).join('')}</div></div>
    <div class="row-btns"><button class="btn ghost" data-act="close-sheet">${T("取消")}</button><button class="btn" id="psv">${T("保存")}</button></div>`);
+  s.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{acc=b.dataset.acc;s.querySelectorAll('[data-acc]').forEach(x=>x.classList.toggle('on',x===b))});
   s.querySelector('#pav').onclick=async()=>{const f=await pickFile('image/*');if(!f)return;av=(await imgThumb(f,256,.8)).thumb;s.querySelector('#pav').innerHTML=avatar(av,'','xl sticker')+T("<span>换头像</span>")};
-  s.querySelector('#psv').onclick=async()=>{await guard(()=>ST.saveProfile({name:s.querySelector('#pn').value.trim(),bio:s.querySelector('#pb2').value.trim(),avatar:av}),T("正在加密保存…"));closeSheet();toast(T("已保存"));renderSide()}}
+  s.querySelector('#psv').onclick=async()=>{const v={name:s.querySelector('#pn').value.trim(),bio:s.querySelector('#pb2').value.trim(),avatar:av,accent:acc};if(!isNew)v.id=e.id;
+    await guard(()=>ST.saveAlt(v),T("正在加密保存…"));closeSheet();toast(T("已保存"));renderSide();if(ui.open)renderPane()}}
+function profilesHtml(){const P=ST.me.profile;const used=id=>Object.values(P.assign).filter(x=>x===id).length;
+  return`<h4 class="sec">${T("多套个人资料")}</h4><div class="card plist">${P.profiles.map(e=>`<div class="prow">${avatar(e.avatar,e.name||T("我"),'sm sticker')}<div class="pmeta"><b>${esc(e.name||T("未设置昵称"))}${e.id===P.def?`<span class="pill">${T("默认")}</span>`:''}</b><small>${e.id===P.def?T("未指定的会话都用这套"):used(e.id)+T(" 个会话在用")}</small></div>
+   <div class="pacts"><button class="btn sm ghost" data-act="pf-edit" data-id="${e.id}">${T("编辑")}</button>${e.id!==P.def?`<button class="btn sm ghost" data-act="pf-def" data-id="${e.id}">${T("设为默认")}</button><button class="btn sm ghost danger" data-act="pf-del" data-id="${e.id}">${T("删除")}</button>`:''}</div></div>`).join('')}
+   <button class="btn sm" data-act="pf-new">${T("+ 新建资料")}</button><p class="fine">${T("每个会话可以单独指定用哪套资料（聊天详情 → 对此会话使用的资料）。对方只能解密到给他的那一套。")}</p></div>`}
+function convProfileSheet(c){const P=ST.me.profile;const cur=P.assign[c.id]||P.def;
+  const s=sheet(`${sheetHead(T("对此会话使用的资料"),T("只有这个会话的成员能看到你选的资料"))}<div class="opts plist-pick">${P.profiles.map(e=>`<button class="${e.id===cur?'on':''}" data-v="${e.id}">${avatar(e.avatar,e.name||T("我"),'xs sticker')}<span>${esc(e.name||T("未设置昵称"))}${e.id===P.def?' · '+T("默认"):''}</span></button>`).join('')}</div>`,'small');
+  s.querySelectorAll('[data-v]').forEach(b=>b.onclick=async()=>{await guard(()=>ST.assignConv(c.id,b.dataset.v),T("正在加密保存…"));toast(T("已保存"));closeSheet();renderPane();infoSheet()})}
+async function pushSheet(){const st=await ST.pushStatus();const yn=v=>v?T("是 ✓"):T("否");
+  const rows=[[T("通知权限"),{granted:T("已允许 ✓"),denied:T("已拒绝"),default:T("未询问"),unsupported:T("不支持")}[st.perm]||st.perm],[T("推送订阅"),yn(st.sub)],[T("后台服务"),yn(st.sw)]];
+  if(st.ios)rows.push([T("从主屏幕打开"),yn(st.standalone)]);
+  const hint=!st.supported?(st.ios?T("iPhone 需要先\"添加到主屏幕\"，从主屏幕打开才能收到推送"):T("这个浏览器不支持通知")):st.perm==='denied'?T("通知被系统拒绝了：请到 设置 → 通知 → 悄悄话 打开允许。"):(st.ios&&!st.standalone)?T("iPhone 需要先\"添加到主屏幕\"，从主屏幕打开才能收到推送"):'';
+  const s=sheet(`${sheetHead(T("消息提醒"),T("通知里只显示\"你有一条新消息\"，不含任何内容"))}<ul class="kv">${rows.map(([k,v])=>`<li><span>${k}</span><b>${v}</b></li>`).join('')}</ul>${hint?`<p class="fine warnline">${hint}</p>`:''}
+   <div class="row-btns"><button class="btn ghost" id="pon">${st.perm==='granted'?T("重新订阅"):T("开启通知")}</button><button class="btn" id="ptest" ${st.perm==='granted'?'':'disabled'}>${T("发送测试通知")}</button></div><p class="fine">${T("测试通知会发到你自己登录的设备。锁屏或切到其他 app 时更容易看到。")}</p>`,'small');
+  s.querySelector('#pon').onclick=async()=>{try{const r=await ST.enablePush();toast(r==='push'?T("已开启推送提醒（锁屏也能收到）"):T("已开启提醒（app 在后台打开时提醒）"))}catch(e){toast(e.message,'err')}renderSide();pushSheet()};
+  s.querySelector('#ptest').onclick=async()=>{const r=await guard(()=>ST.testPush(),T("正在发送…"));if(!r)return;const ok=(r.results||[]).filter(x=>x.status>=200&&x.status<300).length;
+    toast(ok?T("已发送到 ")+ok+T(" 台设备，几秒内会收到"):T("发送失败：")+((r.results||[]).map(x=>x.host+' '+x.status).join(', ')||T("没有已订阅的设备")),ok?'':'err')}}
+async function profileCard(ref){if(!ref)return;const [uid,cid]=String(ref).split('|');await ST.ensureAccounts([uid]).catch(()=>{});const mine=uid===ST.me.id;const p=ST.profileOf(uid,cid)||{};const a=mine?{handle:ST.me.handle}:ST.accounts.get(uid);
+  const handle=a&&a.handle?a.handle:'';const dm=[...ST.convs.values()].find(c=>c.kind==='dm'&&ST.peerOf(c)===uid);const name=ST.nameOf(uid,cid);const ver=!mine&&a&&a.pub_ecdh&&localStorage.getItem('hush-ver-'+uid)===a.pub_ecdh.slice(-24);
+  const s=sheet(`<div class="sh-head pc-head"><span></span><button class="ibtn" data-act="close-sheet" aria-label="${T('关闭')}">${ic('x')}</button></div>
+  <div class="pcard acc-${esc(p.accent||'pink')}">${isOffice()?`<div class="pc-clip"></div><div class="pc-strip"><span>HUSH · ID CARD</span><span>${mine?'SELF':'MEMBER'}</span></div>`:`<svg class="pc-scallop" viewBox="0 0 100 100"><path d="${SCALLOP}"/></svg><span class="tape"></span>`}
+   <button class="pc-av" id="pcav" aria-label="${T('查看大图')}">${avatar(p.avatar,name,'xxl sticker')}</button>
+   <h2 class="pc-name">${esc(name)}</h2>${handle?`<p class="pc-id">ID · ${esc(handle.slice(0,4)+' '+handle.slice(4))}</p>`:''}
+   <p class="pc-bio">${p.bio?esc(p.bio):`<i>${T("还没有写签名")}</i>`}</p>
+   ${mine&&cid?`<p class="pc-tag">${T("这个会话里对方看到的是这套资料")}</p>`:''}${!mine?`<p class="pc-tag">${ver?T("已核对安全码 · 端到端加密"):T("端到端加密")}</p>`:''}</div>
+   <div class="pc-acts">${mine?`<button class="btn" id="pcedit">${T("编辑资料")}</button>`:`<button class="btn" id="pcmsg">${dm?T("发消息"):T("添加好友并发消息")}</button><button class="btn ghost" id="pcsafe">${ver?T("查看安全码"):T("核对安全码")}</button>`}</div>`,'small pc-sheet');
+  s.querySelector('#pcav').onclick=()=>{if(!p.avatar)return;const z=document.createElement('div');z.className='avzoom';z.innerHTML=`<img src="${esc(p.avatar)}" alt="">`;z.onclick=()=>z.remove();document.body.appendChild(z)};
+  if(mine)s.querySelector('#pcedit').onclick=()=>profileSheet(cid?ST.effProfile(cid).id:undefined);
+  else{s.querySelector('#pcsafe').onclick=()=>safetySheet(uid);
+    s.querySelector('#pcmsg').onclick=async()=>{let c=dm;if(!c){if(!handle)return toast(T("拿不到对方公钥"),'err');c=await guard(()=>ST.addContact(handle),T("正在交换密钥…"));if(!c)return}closeSheet();openConv(c.id||c)}}}
 function addFriendSheet(prefill=''){const s=sheet(`${sheetHead(T("添加好友"),T("输入对方的 8 位邀请码"))}<label class="fld"><span>${T("邀请码")}</span><input id="hc" maxlength="9" value="${esc(prefill)}" placeholder="ABCD EFGH" autocapitalize="characters"></label>
   <p class="fine">${T("我的邀请码：")}<b>${ST.me.handle}</b></p><div class="row-btns"><button class="btn ghost" data-act="close-sheet">${T("取消")}</button><button class="btn" id="hcgo">${T("建立加密对话")}</button></div>`,'small');
   const go=async()=>{const v=s.querySelector('#hc').value;const c=await guard(()=>ST.addContact(v),T("正在交换密钥…"));if(c){closeSheet();openConv(c.id)}};s.querySelector('#hcgo').onclick=go;s.querySelector('#hc').onkeydown=e=>e.key==='Enter'&&go()}
@@ -314,8 +367,8 @@ function openConv(id){ui.open=id;ui.cq='';ui.reply=null;ui.tab='chats';if(!$('.s
 function incoming({c,m}){
   const visible=document.visibilityState==='visible';
   if(visible&&ui.open===c.id){ST.markRead(c);return}
-  const title=c.kind==='group'?ST.convTitle(c):ST.nameOf(m.sender);
-  const text=S.peek?(c.kind==='group'?ST.nameOf(m.sender)+T("："):'')+ST.preview(m.body):T("你有一条新消息");
+  const title=(mentionsMe(m)?T("有人@你")+' · ':'')+(c.kind==='group'?ST.convTitle(c):ST.nameOf(m.sender,c.id));
+  const text=S.peek?(c.kind==='group'?ST.nameOf(m.sender,c.id)+T("："):'')+ST.preview(m.body):T("你有一条新消息");
   if(visible){const t=document.createElement('div');t.className='banner';t.innerHTML=`${avatar(ST.convAvatar(c),title,'sm sticker')}<div><b>${esc(title)}</b><p>${esc(text)}</p></div>`;t.onclick=()=>{t.remove();openConv(c.id)};
     $('#toasts').appendChild(t);setTimeout(()=>t.classList.add('out'),4200);setTimeout(()=>t.remove(),4600);try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}
   else if('Notification' in window&&Notification.permission==='granted'){navigator.serviceWorker.ready.then(r=>r.showNotification(T("悄悄话"),{body:T("你有一条新消息"),tag:'hush-'+c.id,icon:'icons/icon-192.png',badge:'icons/badge.png',data:{conv:c.id}})).catch(()=>{})}
@@ -333,13 +386,12 @@ const ACT={
     s.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{closeSheet();sendMedia(b.dataset.a)})},
   voice:startVoice,'cancel-reply':()=>{ui.reply=null;renderReply()},
   'chat-search':()=>{const el=$('.csearch');el.classList.toggle('on');if(el.classList.contains('on'))$('#cq').focus();else{ui.cq='';$('#cq').value='';renderMsgs(true)}},
-  info:infoSheet,view:b=>viewMedia(b.dataset.mid),play:b=>playVoice(b.dataset.mid,b),dlfile:b=>dlFile(b.dataset.mid),
+  pcard:b=>profileCard(b.dataset.uid),'pf-edit':b=>profileSheet(b.dataset.id),'pf-new':()=>profileSheet('new'),'pf-def':async b=>{await guard(()=>ST.setDefaultAlt(b.dataset.id),T("正在加密保存…"));renderSide()},'pf-del':async b=>{if(!await confirmBox(T("删除资料"),T("用这套资料的会话会改回默认资料。"),T("删除"),true))return;await guard(()=>ST.deleteAlt(b.dataset.id),T("正在删除…"));renderSide()},selfav:()=>{S.selfAv=!S.selfAv;renderSide();if(ui.open)renderPane()},info:infoSheet,view:b=>viewMedia(b.dataset.mid),play:b=>playVoice(b.dataset.mid,b),dlfile:b=>dlFile(b.dataset.mid),
   'copy-fav':b=>{const f=ST.favs.find(x=>x.id===b.dataset.id);navigator.clipboard.writeText(f.data.body.text).then(()=>toast(T("已复制")))},
   'del-fav':b=>guard(()=>ST.delFav(b.dataset.id)),
-  'edit-profile':profileSheet,'copy-code':()=>navigator.clipboard.writeText(ST.me.handle).then(()=>toast(T("邀请码已复制"))),
+  'edit-profile':()=>profileSheet(),'copy-code':()=>navigator.clipboard.writeText(ST.me.handle).then(()=>toast(T("邀请码已复制"))),
   'copy-link':()=>navigator.clipboard.writeText(location.origin+location.pathname+'?add='+ST.me.handle).then(()=>toast(T("邀请链接已复制"))),
-  notify:async()=>{try{const r=await ST.enablePush();toast(r==='push'&&CFG.PUSH_READY?T("已开启推送提醒（锁屏也能收到）"):T("已开启提醒（app 在后台打开时提醒）"));
-    if(/iP(hone|ad)/.test(navigator.userAgent)&&!navigator.standalone)toast(T("iPhone 需要先\"添加到主屏幕\"，从主屏幕打开才能收到推送"))}catch(e){toast(e.message,'err')}renderSide()},
+  notify:()=>pushSheet(),
   autolock:()=>{const s=sheet(`${sheetHead(T("自动上锁"),T("无操作或切到后台超过这个时间，就清除内存里的密钥"))}<div class="opts">${[[1,T("1 分钟")],[5,T("5 分钟")],[15,T("15 分钟")],[60,T("1 小时")],[0,T("关闭")]].map(([v,l])=>`<button class="${S.lockMin===v?'on':''}" data-v="${v}">${l}</button>`).join('')}</div>`,'small');
     s.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{S.lockMin=+b.dataset.v;closeSheet();renderSide()})},
   peek:()=>{S.peek=!S.peek;renderSide()},

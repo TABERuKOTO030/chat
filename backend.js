@@ -41,6 +41,7 @@ function supa(){
     async delFav(id){ok(await sb.from('chat_favs').delete().eq('id',id))},
     async savePush(sub){ok(await sb.from('chat_push').upsert({endpoint:sub.endpoint,user_id:uid,sub}))},
     async delPush(endpoint){await sb.from('chat_push').delete().eq('endpoint',endpoint)},
+    async testPush(){const r=await sb.functions.invoke(CFG.PUSH_FUNCTION,{body:{test:true}});if(r.error)throw r.error;return r.data},
     async notify(convId,msgId){if(!CFG.VAPID_PUBLIC_KEY)return;try{await sb.functions.invoke(CFG.PUSH_FUNCTION,{body:{conv_id:convId,msg_id:msgId}})}catch(e){}},
     async wipe(){const r=ok(await sb.rpc('chat_wipe_me'));await sb.auth.signOut({scope:'local'});return r!==false},
     subscribe(cb){if(chan)sb.removeChannel(chan);
@@ -69,7 +70,7 @@ function mock(base){
     sendMsg:r=>call('sendMsg',{r}),deleteMsgs:ids=>call('deleteMsgs',{ids}),deleteConvMsgs:convId=>call('deleteConvMsgs',{convId}),
     upload:(path,bytes)=>call('upload',{path,data:HC.b64(bytes)}),download:async path=>HC.ub64(await call('download',{path})),removeBlobs:paths=>call('removeBlobs',{paths}),listBlobs:convId=>call('listBlobs',{convId}),
     listFavs:()=>call('listFavs'),addFav:r=>call('addFav',{r}),delFav:id=>call('delFav',{id}),savePush:sub=>call('savePush',{sub}),delPush:e=>call('delPush',{e}),
-    notify:async()=>{},async wipe(){await call('wipe');await this.signOut();return true},
+    notify:async()=>{},testPush:async()=>({sent:0,results:[]}),async wipe(){await call('wipe');await this.signOut();return true},
     subscribe(cb){if(es)es.close();es=new EventSource(base+'/events?tok='+tok);es.onmessage=e=>cb(JSON.parse(e.data));es.onopen=()=>cb({type:'status',status:'SUBSCRIBED'})}
   };return B;
 }
