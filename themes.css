@@ -1,0 +1,151 @@
+/* ===== HUSH v6 新主题：迷恋·暗夜 / 幻想超新星 / 纯白秘闻（原创 CSS/SVG 装饰） ===== */
+@font-face{font-family:"HFraktur";src:url(fonts/fraktur.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"HPinyon";src:url(fonts/pinyon.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"HCorm";src:url(fonts/corm.woff2) format("woff2");font-weight:400 600;font-display:swap}
+@font-face{font-family:"HCorm";src:url(fonts/corm-i.woff2) format("woff2");font-style:italic;font-display:swap}
+
+/* --- 5 色块主题切换器 --- */
+.tswitch.tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;border-radius:22px;padding:6px}
+.tswitch.tgrid button{flex-direction:column;gap:4px;padding:7px 2px 6px;border-radius:16px;font-size:10.5px;min-width:0}
+.tswitch.tgrid button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tsw{position:relative;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a) 0 55%,var(--c) 55%);display:block;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.tsw em{position:absolute;right:5px;bottom:5px;width:13px;height:13px;border-radius:50%;background:var(--b)}
+.tsw-noir em{border-radius:0;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);width:15px;height:15px;box-shadow:0 0 6px var(--b)}
+.tsw-cosmos{background:linear-gradient(160deg,#F4C7E4,#C9C2F7 50%,#A9D4FA)}.tsw-cosmos::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:repeating-linear-gradient(-45deg,#A8E8E0 0 4px,#fff 4px 8px)}
+.tsw-rabbit em{clip-path:path("M6.5 12C2 9 0 6.5 0 4 0 2 1.6.5 3.5.5c1.2 0 2.3.7 3 1.8C7.2 1.2 8.3.5 9.5.5 11.4.5 13 2 13 4c0 2.5-2 5-6.5 8Z");border-radius:0}
+.tsw-office em{border-radius:3px}
+.sw-row .tswitch.tgrid{flex:1 1 100%}
+.t-new .tswitch button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+
+/* --- 新主题共通 --- */
+.t-new .hd{padding:24px 20px 20px;min-height:150px}
+.t-new .hd-sub{position:static;margin:6px 0 0;color:var(--muted);font-weight:500}
+.t-new .st4{position:absolute;fill:currentColor}
+.t-new .av,.t-new .av-c0,.t-new .av-c1,.t-new .av-c2,.t-new .av-c3{background:var(--chip);color:var(--chip-ink)}
+.t-new .av-c1{background:var(--card2)}.t-new .av-c3{background:var(--accent2);color:var(--on-accent)}
+.t-new .ubadge{background:var(--accent);color:var(--on-accent)}
+.t-new .sendb{background:var(--accent);color:var(--on-accent)}
+.t-new .e2e-note{background:var(--card2);color:var(--muted)}
+.t-new .quote{background:var(--chip);color:var(--ink)}
+.t-new .toast{background:var(--ink);color:var(--card)}
+.t-new .pcard{background:var(--card);box-shadow:var(--shadow);overflow:visible}
+.t-new .pc-tag{background:var(--chip);color:var(--chip-ink)}
+.t-new .tg{background:var(--card2)}.t-new .tg.on{background:var(--accent)}
+.t-new .mention{background:var(--chip);color:var(--chip-ink)}
+.t-new .menpick{background:var(--card);color:var(--ink)}
+.t-new .menbadge{background:var(--accent2);color:var(--on-accent)}
+.t-new .menjump{background:var(--accent);color:var(--on-accent)}
+.t-new .tbadge{color:#fff}
+.t-new .citem.cur{background:var(--chip)}
+.t-new .seg{background:var(--card2)}
+.pe-new{display:grid;place-items:center;height:100%;align-content:center;gap:6px;color:var(--muted);text-align:center}
+.pe-new .pe-word{font-size:96px;line-height:1;color:var(--accent)}
+.pe-new .thorn{width:220px;color:var(--accent)}
+
+/* ========== 迷恋·暗夜 ========== */
+.t-noir{--bg:#0B0A0D;--chatbg:#0E0C10;--card:#17141A;--card2:#221D25;--ink:#F4E9EE;--muted:#B7A4AE;--accent:#F3C6D6;--accent2:#C98CA6;--on-accent:#1A1016;
+ --mine:#F3C6D6;--mine-ink:#1A1016;--theirs:#221D25;--chip:#2E2430;--chip-ink:#F7D6E2;--danger:#FF7A9C;--radius:18px;
+ --font:"HCorm","Noto Serif SC",serif;--display:"HFraktur",serif;--mono:"HCorm",serif;--shadow:0 0 0 1px rgba(243,198,214,.08),0 10px 30px rgba(0,0,0,.5);
+ color:var(--ink);background:#0B0A0D linear-gradient(rgba(243,198,214,.045) 1px,transparent 1px) 0 0/22px 22px,#0B0A0D linear-gradient(90deg,rgba(243,198,214,.045) 1px,transparent 1px) 0 0/22px 22px;font-family:var(--font)}
+.t-noir body,.t-noir input,.t-noir textarea,.t-noir button{font-family:inherit}
+.t-noir .pane{background:transparent}
+.hd-noir{text-align:center;color:#F3C6D6}
+.nx-word{font-family:"HFraktur",serif;font-size:76px;line-height:.95;color:#FBE3EC;text-shadow:0 0 6px rgba(243,198,214,.9),0 0 22px rgba(243,140,180,.55),0 0 2px #fff;letter-spacing:.02em}
+.hd-noir .thorn{display:block;width:230px;margin:-6px auto 2px;color:#E9AFC4;filter:drop-shadow(0 0 4px rgba(243,198,214,.6))}
+.nx-title{margin:2px 0 0;font-size:15px;letter-spacing:.5em;color:#F3C6D6;text-indent:.5em}
+.hd-noir .hd-sub{font-style:italic;letter-spacing:.2em;font-size:12px;color:#B7A4AE}
+.hd-noir .st4{color:#FBE3EC;filter:drop-shadow(0 0 5px #F3C6D6)}
+.hd-noir .n1{left:16%;top:22px;width:18px}.hd-noir .n2{right:14%;top:44px;width:12px}.hd-noir .n3{right:24%;top:14px;width:8px}
+.hd-noir::after{content:"";position:absolute;left:10px;bottom:6px;width:46px;height:18px;background:radial-gradient(#F3C6D6 1px,transparent 1.3px) 0 0/4px 4px;opacity:.55}
+.t-noir .card,.t-noir .citem,.t-noir .composer,.t-noir .chat-hd-row,.t-noir .search,.t-noir .tabs,.t-noir .sheet{background:var(--card);box-shadow:var(--shadow)}
+.t-noir .sheet{background:#141116}
+.t-noir .citem b,.t-noir .chat-title b{font-weight:600;font-size:17px}
+.t-noir .tswitch{background:rgba(243,198,214,.06)}
+.t-noir .tswitch button.on{background:#2A2230;color:#FBE3EC;box-shadow:0 0 0 1px rgba(243,198,214,.25)}
+.t-noir .btn:not(.ghost):not(.danger){background:#F3C6D6;color:#1A1016;box-shadow:0 0 14px rgba(243,198,214,.35)}
+.t-noir .bubble{border-radius:16px 16px 16px 4px}.t-noir .msg.me .bubble{border-radius:16px 16px 4px 16px;box-shadow:0 0 12px rgba(243,198,214,.28)}
+.t-noir .day{color:#B7A4AE;font-style:italic;letter-spacing:.2em}
+.t-noir .scrim{background:rgba(0,0,0,.6)}
+.t-noir input,.t-noir textarea{color:var(--ink)}
+.t-noir input::placeholder,.t-noir textarea::placeholder{color:#8E7C86}
+.t-noir .fld input,.t-noir .fld textarea,.t-noir .fld select{background:#221D25;color:var(--ink)}
+.t-noir .pcard{background:#141116;box-shadow:0 0 0 1px rgba(243,198,214,.14),0 0 40px rgba(243,140,180,.12)}
+.t-noir .pc-th{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:240px;color:#E9AFC4;opacity:.85;filter:drop-shadow(0 0 4px rgba(243,198,214,.5))}
+.t-noir .pc-s1{left:22px;top:30px;width:16px;color:#FBE3EC;filter:drop-shadow(0 0 4px #F3C6D6)}.t-noir .pc-s2{right:26px;top:150px;width:11px;color:#FBE3EC}
+.t-noir .pc-av .av{box-shadow:0 0 0 2px #F3C6D6,0 0 24px rgba(243,198,214,.55)}
+.t-noir .pc-name{font-family:"HFraktur",serif;font-size:34px;font-weight:400;color:#FBE3EC;text-shadow:0 0 10px rgba(243,198,214,.6)}
+.t-noir .sticker{filter:none}
+.t-noir .pe-word{font-family:"HFraktur",serif;color:#FBE3EC;text-shadow:0 0 18px rgba(243,198,214,.6)}
+.t-noir .menpick{background:#1C181F}
+.t-noir .toast{background:#F3C6D6;color:#1A1016}
+.t-noir .e2e-note{background:rgba(243,198,214,.06)}
+
+/* ========== 幻想超新星 ========== */
+.t-cosmos{--bg:#C9C2F7;--chatbg:transparent;--card:#FFFFFF;--card2:#F1EEFF;--ink:#2E2A57;--muted:#7A74A8;--accent:#F28DBA;--accent2:#8E9BF5;--on-accent:#fff;
+ --mine:#8E9BF5;--mine-ink:#fff;--theirs:#FFFFFF;--chip:#EAE6FF;--chip-ink:#5B54B8;--danger:#F06292;--radius:26px;
+ --font:"Fredoka","PingFang SC",system-ui,sans-serif;--display:"Fredoka",sans-serif;--mono:"Fredoka",sans-serif;--shadow:0 8px 22px rgba(110,96,200,.16);
+ color:var(--ink);font-family:var(--font);background:radial-gradient(circle,#fff 1.3px,transparent 1.6px) 0 0/44px 44px,radial-gradient(circle,rgba(255,255,255,.6) 1px,transparent 1.2px) 22px 22px/44px 44px,linear-gradient(165deg,#F6CDE6 0%,#C9C2F7 42%,#A9D4FA 100%) fixed}
+.t-cosmos .pane{background:transparent}
+.hd-cosmos{padding-top:34px!important;text-align:center}
+.awning{position:absolute;left:0;right:0;top:0;height:22px;background:repeating-linear-gradient(-45deg,#A8E8E0 0 9px,#fff 9px 18px);-webkit-mask:radial-gradient(circle at 50% 100%,transparent 6px,#000 6.5px) 0 0/18px 100%,linear-gradient(#000,#000) 0 0/100% 15px no-repeat;mask:radial-gradient(10px at 9px 100%,transparent 98%,#000) 0 0/18px 100%}
+.cz-word{font-family:"Fredoka",sans-serif;font-weight:700;font-size:64px;line-height:1;color:#fff;letter-spacing:.04em;text-shadow:0 3px 0 #8E9BF5,0 6px 0 #F28DBA,0 10px 18px rgba(90,80,190,.3)}
+.ribbon{display:inline-block;position:relative;margin-top:12px;padding:5px 22px;background:#F7B5CF;color:#fff;font-weight:700;font-size:15px;letter-spacing:.2em;border-radius:6px}
+.ribbon::before,.ribbon::after{content:"";position:absolute;top:5px;width:14px;height:100%;background:#E98DB4;z-index:-1}
+.ribbon::before{left:-10px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}.ribbon::after{right:-10px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
+.hd-cosmos .hd-sub{color:#5B54B8;font-weight:600}
+.hd-cosmos .st4{color:#fff;filter:drop-shadow(0 2px 3px rgba(110,96,200,.35))}
+.hd-cosmos .c1{left:12%;top:40px;width:22px}.hd-cosmos .c2{right:12%;top:52px;width:14px;color:#FFE99A}.hd-cosmos .c3{right:22%;bottom:22px;width:10px}
+.cz-ball{position:absolute;left:8%;bottom:18px;width:26px;height:26px;border-radius:50%;background:linear-gradient(#F7B5CF 0 46%,#fff 46% 54%,#A9D4FA 54%);box-shadow:0 3px 8px rgba(110,96,200,.25)}
+.cz-o{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.7)}.cz-o.o1{right:6%;bottom:14px;width:18px;height:18px}.cz-o.o2{left:24%;top:30px;width:10px;height:10px}
+.t-cosmos .tswitch{background:rgba(255,255,255,.55)}
+.t-cosmos .citem{border-radius:24px}
+.t-cosmos .citem b{font-weight:600}
+.t-cosmos .btn:not(.ghost):not(.danger){background:#F28DBA;box-shadow:0 4px 0 #D86E9F}
+.t-cosmos .msg.me .bubble{background:linear-gradient(135deg,#9AA6F7,#B59CF2)}
+.t-cosmos .day{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(90,80,190,.4)}
+.t-cosmos .sec{color:#5B54B8;font-weight:600}
+.t-cosmos .pcard{background:#fff;padding-top:40px;overflow:hidden}
+.pc-awn{position:absolute;left:0;right:0;top:0;height:20px;background:repeating-linear-gradient(-45deg,#A8E8E0 0 9px,#fff 9px 18px);border-radius:28px 28px 0 0}
+.t-cosmos .pc-s1{left:22px;top:40px;width:20px;color:#F7B5CF}.t-cosmos .pc-s2{right:26px;top:140px;width:14px;color:#8E9BF5}
+.t-cosmos .pc-av .av{box-shadow:0 0 0 6px #EAE6FF,0 0 0 9px #fff,0 0 0 11px #F7B5CF}
+.t-cosmos .pc-name{font-weight:700;color:#2E2A57}
+.t-cosmos .pe-word{font-weight:700;color:#fff;text-shadow:0 4px 0 #8E9BF5}
+.t-cosmos .toast{background:#5B54B8;color:#fff}
+
+/* ========== 纯白秘闻 ========== */
+.t-rabbit{--bg:#F6F5F4;--chatbg:transparent;--card:#FFFFFF;--card2:#F0EEEE;--ink:#3A3739;--muted:#8B8689;--accent:#7E7A7D;--accent2:#E9C7D1;--on-accent:#fff;
+ --mine:#EFE9EB;--mine-ink:#3A3739;--theirs:#FFFFFF;--chip:#F7E9ED;--chip-ink:#8E5D6C;--danger:#C76A82;--radius:14px;
+ --font:"HCorm","Noto Serif SC",serif;--display:"HPinyon",serif;--mono:"HCorm",serif;--shadow:0 1px 2px rgba(60,50,55,.05),0 10px 30px rgba(60,50,55,.06);
+ color:var(--ink);font-family:var(--font);background:#F6F5F4 linear-gradient(180deg,#FBFAFA,#F1F0EF)}
+.t-rabbit .pane{background:transparent}
+.hd-rabbit{text-align:center}
+.rb-word{font-family:"HPinyon",serif;font-size:92px;line-height:.9;color:#A9A5A8;margin:4px 0 -8px;letter-spacing:.01em}
+.rb-title{margin:0;font-size:16px;letter-spacing:.6em;text-indent:.6em;color:#5E5A5D}
+.hd-rabbit .hd-sub{font-variant:small-caps;letter-spacing:.24em;font-size:12px;color:#9C979A}
+.rb-rib{position:absolute;right:16%;top:26px;width:28px;height:18px}
+.rb-rib::before,.rb-rib::after{content:"";position:absolute;top:0;width:14px;height:12px;background:#F3D3DC;border-radius:60% 10% 60% 10%}
+.rb-rib::before{left:0;transform:rotate(-12deg)}.rb-rib::after{right:0;transform:scaleX(-1) rotate(-12deg)}
+.t-rabbit .tswitch{background:rgba(255,255,255,.7)}
+.t-rabbit .citem{border-radius:14px;box-shadow:var(--shadow)}
+.t-rabbit .citem b,.t-rabbit .chat-title b{font-weight:600;font-size:17px}
+.t-rabbit .btn:not(.ghost):not(.danger){background:#6F6B6E;border-radius:999px;letter-spacing:.12em}
+.t-rabbit .msg.me .bubble{background:#EFE9EB}
+.t-rabbit .bubble{box-shadow:0 1px 2px rgba(60,50,55,.05);font-size:15.5px}
+.t-rabbit .day{color:#A9A5A8;font-variant:small-caps;letter-spacing:.24em}
+.t-rabbit .sec{font-variant:small-caps;letter-spacing:.22em}
+.t-rabbit .pcard{background:#fff;padding-top:30px}
+.pc-heart{position:absolute;left:50%;top:14px;width:214px;margin-left:-107px;fill:none;stroke:#D8D4D6;stroke-width:1;pointer-events:none}
+.t-rabbit .pc-av .av{clip-path:path("M88 154C35 116 7 85 7 53 7 28 26 10 49 10c16 0 30 9 39 23 9-14 23-23 39-23 23 0 42 18 42 43 0 32-28 63-81 101Z");border-radius:0;width:176px;height:176px}
+.t-rabbit .pc-rib{right:26%;top:22px}
+.t-rabbit .pc-name{font-family:"HPinyon","HCorm",serif;font-size:36px;font-weight:400;color:#6F6B6E}
+.t-rabbit .sticker{filter:none}
+.t-rabbit .pe-word{font-family:"HPinyon",serif;color:#B9B5B8;font-size:120px}
+.t-rabbit .toast{background:#6F6B6E;color:#fff}
+.t-new .btn.ghost{background:var(--chip);color:var(--chip-ink);box-shadow:none}
+.t-noir .day span{background:#221D25;color:#D9C3CD}
+.t-noir .citem .tape{display:none}
+.t-cosmos .tape{background:repeating-linear-gradient(-45deg,#A8E8E0 0 6px,#fff 6px 12px)}
+.t-rabbit .tape{background:#F3DCE2;opacity:.8}
+.t-new .seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.t-noir .seg button.on{background:#F3C6D6;color:#1A1016}
+.t-noir .tape{display:none}

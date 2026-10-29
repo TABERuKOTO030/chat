@@ -7,8 +7,14 @@ const S={get theme(){return localStorage.getItem('hush-theme')||'gacha'},set the
   get selfAv(){return localStorage.getItem('hush-selfav')==='1'},set selfAv(v){localStorage.setItem('hush-selfav',v?'1':'0')},
   get lockMin(){return +(localStorage.getItem('hush-lock')||5)},set lockMin(v){localStorage.setItem('hush-lock',v)},
   get peek(){return localStorage.getItem('hush-peek')!=='0'},set peek(v){localStorage.setItem('hush-peek',v?'1':'0')}};
-const isOffice=()=>S.theme==='office';
-function applyTheme(){document.body.className='t-'+S.theme;const m=$('meta[name=theme-color]');if(m)m.content=isOffice()?'#E7E7E8':'#BFE1F6'}
+const THEMES=[['gacha','扭蛋糖果','#BFE1F6','#F49BB9','#FFF8EC'],['office','超自然办公室','#E7E7E8','#141414','#3FC6D6'],['noir','迷恋·暗夜','#0B0A0D','#F3C6D6','#2A2230'],['cosmos','幻想超新星','#C9C2F7','#F7B5CF','#A8E8E0'],['rabbit','纯白秘闻','#F6F5F4','#B9B5B8','#F3DCE2']];
+const isOffice=()=>S.theme==='office';const TH=()=>THEMES.some(t=>t[0]===S.theme)?S.theme:'gacha';
+// 新主题的原创装饰（SVG）
+const thorn=(c='')=>`<svg class="thorn ${c}" viewBox="0 0 240 60" aria-hidden="true"><path d="M4 34C40 10 80 52 120 30S200 8 236 30" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M30 26l-6-12M54 34l4-14M82 40l-8-12M108 33l6-13M134 27l-5-13M160 22l7-11M188 22l-4 13M214 26l8-10M44 30l-10 4M96 37l-11 5M150 24l-10-6M200 23l9 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M120 30c-6-14 4-22 0-28 10 8 6 18 0 28z" fill="currentColor" opacity=".8"/></svg>`;
+const star4=(c='')=>`<svg class="st4 ${c}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.6 8 16 11.4 24 12C16 12.6 12.6 16 12 24C11.4 16 8 12.6 0 12C8 11.4 11.4 8 12 0Z"/></svg>`;
+const heartP='M50 88C20 66 4 48 4 30 4 16 15 6 28 6c9 0 17 5 22 13C55 11 63 6 72 6c13 0 24 10 24 24 0 18-16 36-46 58Z';
+const ribbon=(t,c='')=>`<span class="ribbon ${c}">${esc(t)}</span>`;
+function applyTheme(){const t=TH();document.body.className='t-'+t+(t==='gacha'||t==='office'?'':' t-new');const m=$('meta[name=theme-color]');if(m)m.content={gacha:'#BFE1F6',office:'#E7E7E8',noir:'#0B0A0D',cosmos:'#C9C2F7',rabbit:'#F6F5F4'}[t]}
 // ---------- 图形 ----------
 const sparkle=(c='')=>`<svg class="spk ${c}" viewBox="0 0 24 24"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg>`;
 function scallopPath(n=12,r1=46,r2=50){let d='';for(let i=0;i<=n*8;i++){const a=i/(n*8)*Math.PI*2;const r=r1+(r2-r1)*Math.abs(Math.cos(a*n/2));d+=(i?'L':'M')+(50+r*Math.cos(a)).toFixed(2)+' '+(50+r*Math.sin(a)).toFixed(2)}return d+'Z'}
@@ -50,13 +56,16 @@ async function videoThumb(file){const url=URL.createObjectURL(file);try{const v=
   const r=Math.min(1,360/Math.max(v.videoWidth||360,v.videoHeight||360));const c=document.createElement('canvas');c.width=Math.round((v.videoWidth||360)*r)||360;c.height=Math.round((v.videoHeight||240)*r)||240;
   try{c.getContext('2d').drawImage(v,0,0,c.width,c.height)}catch(e){}return{thumb:c.toDataURL('image/jpeg',.7),w:v.videoWidth,h:v.videoHeight,dur:Math.round(v.duration||0)}}catch(e){return{}}finally{URL.revokeObjectURL(url)}}
 // ---------- 主题装饰 ----------
-function brandHead(title,sub){
+function brandHead(title,sub){const th=TH();
+  if(th==='noir')return`<header class="hd hd-noir"><div class="nx-word" aria-hidden="true">Hush</div>${thorn('t1')}${star4('n1')}${star4('n2')}${star4('n3')}<p class="nx-title">${esc(title)}</p><p class="hd-sub">${esc(sub||'')}</p></header>`;
+  if(th==='cosmos')return`<header class="hd hd-cosmos"><div class="awning" aria-hidden="true"></div><div class="cz-word" aria-hidden="true">HUSH</div>${ribbon(title,'cz-rib')}<span class="cz-ball" aria-hidden="true"></span>${star4('c1')}${star4('c2')}${star4('c3')}<i class="cz-o o1"></i><i class="cz-o o2"></i><p class="hd-sub">${esc(sub||'')}</p></header>`;
+  if(th==='rabbit')return`<header class="hd hd-rabbit"><div class="rb-word" aria-hidden="true">Hush</div><p class="rb-title">${esc(title)}</p><span class="rb-rib" aria-hidden="true"></span><p class="hd-sub">${esc(sub||'')}</p></header>`;
   if(isOffice())return`<header class="hd hd-office"><div class="monitor"><div class="screen"><div class="scr-top"><span>${esc(sub||'')}</span><span>${new Date().getFullYear()}/${new Date().getMonth()+1}/${new Date().getDate()}</span></div>
     <h1 class="serif-xl">HUSH<br>OFFICE</h1><div class="sticky"><b>${new Date().getMonth()+1}${T("月")}${new Date().getDate()}</b><small>${esc(title)}</small><i></i></div><p class="scr-cn">${esc(title)}!!</p>${ghost('peek')}</div><div class="stand"></div></div></header>`;
   return`<header class="hd hd-gacha"><div class="wordmark" aria-hidden="true">HUSH<br>HUSHHUSH</div>${badge('VOL.01',title,'tilt')}<p class="hd-sub">${esc(sub||'')}</p>${sparkle('s1')}${sparkle('s2')}${sparkle('s3')}</header>`;
 }
 const langSwitch=()=>`<div class="tswitch lsw" role="group" aria-label="Language"><button data-act="lang" data-v="zh" class="${LANG()==='zh'?'on':''}" lang="zh-CN"><span>中文</span></button><button data-act="lang" data-v="ja" class="${LANG()==='ja'?'on':''}" lang="ja"><span>日本語</span></button></div>`;
-const themeSwitch=()=>`<div class="tswitch" role="group" aria-label="${T('切换风格')}"><button data-act="theme" data-v="gacha" class="${!isOffice()?'on':''}${T("\" title=\"扭蛋糖果\">")}${capsule()}<span>${T("扭蛋糖果")}</span></button><button data-act="theme" data-v="office" class="${isOffice()?'on':''}${T("\" title=\"超自然办公室\">")}${ghost()}<span>${T("超自然办公室")}</span></button></div>`;
+const themeSwitch=()=>`<div class="tswitch tgrid" role="group" aria-label="${T('切换风格')}">${THEMES.map(([k,n,a,b,c])=>`<button data-act="theme" data-v="${k}" class="${TH()===k?'on':''}" title="${T(n)}"><i class="tsw tsw-${k}" style="--a:${a};--b:${b};--c:${c}"><em></em></i><span>${T(n)}</span></button>`).join('')}</div>`;
 // ---------- 登录 / 锁屏 ----------
 function renderAuth(mode='in'){ui.authMode=mode;
   $('#app').innerHTML=`<div class="auth"><div class="sw-row">${themeSwitch()}${langSwitch()}</div>${brandHead(mode==='in'?T("欢迎回来"):T("创建加密空间"),'END-TO-END ENCRYPTED')}
@@ -132,7 +141,7 @@ function notifState(){if(!('Notification' in window))return T("不支持");if(No
 // ---------- 聊天窗口 ----------
 function renderPane(){const el=$('#pane');if(!el)return;const c=ui.open&&ST.convs.get(ui.open);
   document.querySelector('.shell').classList.toggle('open',!!c);
-  if(!c){el.innerHTML=`<div class="pane-empty">${isOffice()?`<div class="pe-office"><h2 class="serif-xl">NO FILE<br>OPENED</h2>${ghost('big')}<span class="tag">${T("选择一个对话")}</span></div>`:`<div class="pe-gacha"><div class="wordmark">GACHA<br>GACHA</div>${capsule('huge')}${badge('HUSH',T("选个对话"))}</div>`}</div>`;return}
+  if(!c){el.innerHTML=`<div class="pane-empty">${isOffice()?`<div class="pe-office"><h2 class="serif-xl">NO FILE<br>OPENED</h2>${ghost('big')}<span class="tag">${T("选择一个对话")}</span></div>`:TH()!=='gacha'?`<div class="pe-new">${TH()==='noir'?thorn('pe-th'):''}<div class="pe-word">Hush</div><p>${T("选个对话")}</p></div>`:`<div class="pe-gacha"><div class="wordmark">GACHA<br>GACHA</div>${capsule('huge')}${badge('HUSH',T("选个对话"))}</div>`}</div>`;return}
   const t=ST.convTitle(c);const sub=c.kind==='group'?`${c.members.length} ${T("位成员 · 端到端加密")}`:(isVerified(c)?T("已核对安全码 · 端到端加密"):T("端到端加密"));
   el.innerHTML=`<section class="chat">
    <header class="chat-hd">${isOffice()?'<div class="chrome"><i></i><i></i><i></i><span>'+esc(t.toUpperCase())+'.CHAT</span></div>':''}<div class="chat-hd-row"><button class="ibtn back" data-act="back" aria-label="${T('返回')}">${ic('back')}</button>${avatar(ST.convAvatar(c),t,'sm sticker',c.kind==='dm'&&ST.peerOf(c)?ST.peerOf(c)+'|'+c.id:'')}
@@ -325,7 +334,7 @@ async function pushSheet(){const st=await ST.pushStatus();const yn=v=>v?T("是 �
 async function profileCard(ref){if(!ref)return;const [uid,cid]=String(ref).split('|');await ST.ensureAccounts([uid]).catch(()=>{});const mine=uid===ST.me.id;const p=ST.profileOf(uid,cid)||{};const a=mine?{handle:ST.me.handle}:ST.accounts.get(uid);
   const handle=a&&a.handle?a.handle:'';const dm=[...ST.convs.values()].find(c=>c.kind==='dm'&&ST.peerOf(c)===uid);const name=ST.nameOf(uid,cid);const ver=!mine&&a&&a.pub_ecdh&&localStorage.getItem('hush-ver-'+uid)===a.pub_ecdh.slice(-24);
   const s=sheet(`<div class="sh-head pc-head"><span></span><button class="ibtn" data-act="close-sheet" aria-label="${T('关闭')}">${ic('x')}</button></div>
-  <div class="pcard acc-${esc(p.accent||'pink')}">${isOffice()?`<div class="pc-clip"></div><div class="pc-strip"><span>HUSH · ID CARD</span><span>${mine?'SELF':'MEMBER'}</span></div>`:`<svg class="pc-scallop" viewBox="0 0 100 100"><path d="${SCALLOP}"/></svg><span class="tape"></span>`}
+  <div class="pcard acc-${esc(p.accent||'pink')}">${isOffice()?`<div class="pc-clip"></div><div class="pc-strip"><span>HUSH · ID CARD</span><span>${mine?'SELF':'MEMBER'}</span></div>`:TH()==='noir'?`${thorn('pc-th')}${star4('pc-s1')}${star4('pc-s2')}`:TH()==='rabbit'?`<svg class="pc-heart" viewBox="0 0 100 94"><path d="${heartP}"/></svg><span class="rb-rib pc-rib"></span>`:TH()==='cosmos'?`<span class="pc-awn"></span>${star4('pc-s1')}${star4('pc-s2')}`:`<svg class="pc-scallop" viewBox="0 0 100 100"><path d="${SCALLOP}"/></svg><span class="tape"></span>`}
    <button class="pc-av" id="pcav" aria-label="${T('查看大图')}">${avatar(p.avatar,name,'xxl sticker')}</button>
    <h2 class="pc-name">${esc(name)}</h2>${handle?`<p class="pc-id">ID · ${esc(handle.slice(0,4)+' '+handle.slice(4))}</p>`:''}
    <p class="pc-bio">${p.bio?esc(p.bio):`<i>${T("还没有写签名")}</i>`}</p>

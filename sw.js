@@ -1,5 +1,5 @@
-const V='hush-v5';
-const ASSETS=['./','index.html','styles.css','config.js','i18n.js','crypto.js','backend.js','core.js','ui.js','vendor/supabase.js','fonts/fredoka.woff2','fonts/abril.woff2','fonts/serif-cjk.woff2','fonts/serif-jp.woff2','manifest.json','icons/icon-192.png','icons/icon-512.png','icons/badge.png'];
+const V='hush-v6';
+const ASSETS=['./','index.html','styles.css','themes.css','config.js','i18n.js','crypto.js','backend.js','core.js','ui.js','vendor/supabase.js','fonts/fredoka.woff2','fonts/abril.woff2','fonts/serif-cjk.woff2','fonts/serif-jp.woff2','fonts/fraktur.woff2','fonts/pinyon.woff2','fonts/corm.woff2','fonts/corm-i.woff2','manifest.json','icons/icon-192.png','icons/icon-512.png','icons/badge.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!=='hush-prefs').map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 // 只缓存 app 自身的静态文件；聊天数据（都是密文）从不进缓存
